@@ -1,0 +1,37 @@
+{
+  "name": "@gallolabs/application",
+  "version": "0.1.0",
+  "description": "A nodejs light framework to frame your work",
+  "main": "dist/src/index.js",
+  "scripts": {
+    "build": "rm -Rf dist && tsc",
+    "test": "npm run build && npx c8 --all --src 'src' --exclude '*/*test*' --report-dir=/tmp/nyc mocha 'dist/test/*test*.js'",
+    "deploy": "npm run test && rm -R dist/test && npm login && trap 'npm logout' EXIT && release-it --no-git.requireCleanWorkingDir"
+  },
+  "type": "module",
+  "author": "",
+  "license": "ISC",
+  "files": [
+    "dist"
+  ],
+  "publishConfig": {
+    "access": "public"
+  },
+  "workspaces": [
+    "."
+  ],
+  "devDependencies": {
+    "@types/mocha": "^10.0.6",
+    "@types/node": "^20.10.4",
+    "c8": "^8.0.1",
+    "json-schema-to-ts": "^3.0.0",
+    "mocha": "^10.2.0",
+    "release-it": "^17.0.1",
+    "typescript": "^5.3.3"
+  },
+  "dependencies": {
+    "@gallolabs/config": "^0.1.1",
+    "@gallolabs/logger": "^1.0.2",
+    "short-uuid": "^4.2.2"
+  }
+}
