@@ -2,8 +2,8 @@ import { loadConfig, ConfigOpts, WatchChangesEventEmitter } from '@gallolabs/con
 import { createLogger, Logger, LoggerOpts, ConsoleHandler, BreadCrumbHandler, createJsonFormatter, createLogfmtFormatter } from '@gallolabs/logger'
 import EventEmitter from 'events'
 import shortUuid from 'short-uuid'
-//export * from './utils'
 import { FromSchema, JSONSchema } from 'json-schema-to-ts'
+import { MetricsRegistry, MetricsServer } from './metrics.js'
 
 export const baseConfigSchema = {
     type: 'object',
@@ -44,7 +44,6 @@ export type UidGenerator = () => string
 
 export type InjectedServices<Config extends BaseConfig> = {
     logger: Logger
-    metrics: any
     config: Config
     name: string
     version: string
@@ -53,6 +52,7 @@ export type InjectedServices<Config extends BaseConfig> = {
     abortController: AbortController
     abortSignal: AbortSignal
     uidGenerator: UidGenerator
+    metrics: MetricsRegistry
 }
 
 export type Services<Config extends BaseConfig> = Record<keyof ServicesDefinition<Config>, any> & InjectedServices<Config>
@@ -337,10 +337,16 @@ class App<Config extends BaseConfig> {
         //     measurementSeparator: '.'
         // })
 
+        const metrics = new MetricsRegistry
+        const metricsServer = new MetricsServer({
+            uidGenerator,
+            registry: metrics
+        })
+
         this.services = createDiContainer({
             config: this.config,
             logger: this.logger,
-            metrics: null,
+            metrics,
             name: this.name,
             version: this.version,
             configWatcher: watchEventEmitter,
@@ -367,6 +373,7 @@ class App<Config extends BaseConfig> {
             if (this.config!.dryRun) {
                 fwkLogger.info('Run skipped (dryRun)')
             } else {
+                metricsServer.start(this.abortController.signal)
                 // DryRun can go to the app run, but we have
                 // To add a non-positive framework config to enable it ?
                 await this.runFn(this.services!)

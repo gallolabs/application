@@ -3,27 +3,18 @@ import { FromSchema, JSONSchema } from 'json-schema-to-ts'
 import { setTimeout } from 'timers/promises'
 
 const configSchema = {
-    ...baseConfigSchema,
+    type: 'object',
     properties: {
         ...baseConfigSchema.properties,
         httpEndpoint: {
             type: 'string'
-        },
-        timeout: {
-            type: 'number',
-            default: 5000
-        },
-        query: {
-            type: 'string'
-        },
-        notMandatory: {type: 'string'}
+        }
     },
-    required: ['httpEndpoint', 'timeout', ...baseConfigSchema.required]
+    required: [...baseConfigSchema.required, 'httpEndpoint'],
+    additionalProperties: false
 } as const satisfies JSONSchema
 
-type Config = FromSchema<typeof configSchema>
-
-runApp<Config>({
+runApp<FromSchema<typeof configSchema>>({
     name: 'simpleapp',
     version: '1.0',
     config: {
@@ -31,14 +22,8 @@ runApp<Config>({
     },
     consoleUse: 'accepted',
     async run({config, abortSignal}) {
-        await setTimeout(3000)
+        await setTimeout(3000, undefined, {signal: abortSignal})
 
-        if (abortSignal.aborted) {
-            throw abortSignal.reason
-        }
-
-        const response = 'called ' + config.httpEndpoint
-
-        console.log('>>', 'Your request is', response, '<<')
+        console.log('>>', 'Your request is xxx from', config.httpEndpoint, '<<')
     }
 })
