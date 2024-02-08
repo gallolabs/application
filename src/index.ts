@@ -3,7 +3,7 @@ import { createLogger, Logger, LoggerOpts, ConsoleHandler, BreadCrumbHandler, cr
 import EventEmitter from 'events'
 import shortUuid from 'short-uuid'
 import { FromSchema, JSONSchema } from 'json-schema-to-ts'
-import { MetricsRegistry, MetricsServer } from './metrics.js'
+import { MetricsRegistry, MetricsUserFriendlyInterface, MetricsServer, MetricsFormatter } from './metrics.js'
 
 export const baseConfigSchema = {
     type: 'object',
@@ -52,7 +52,7 @@ export type InjectedServices<Config extends BaseConfig> = {
     abortController: AbortController
     abortSignal: AbortSignal
     uidGenerator: UidGenerator
-    metrics: MetricsRegistry
+    metrics: MetricsUserFriendlyInterface
 }
 
 export type Services<Config extends BaseConfig> = Record<keyof ServicesDefinition<Config>, any> & InjectedServices<Config>
@@ -337,10 +337,12 @@ class App<Config extends BaseConfig> {
         //     measurementSeparator: '.'
         // })
 
-        const metrics = new MetricsRegistry
+        const metricsRegistry = new MetricsRegistry
+        const metrics = new MetricsUserFriendlyInterface(metricsRegistry)
         const metricsServer = new MetricsServer({
             uidGenerator,
-            registry: metrics
+            formatter: new MetricsFormatter,
+            registry: metricsRegistry
         })
 
         this.services = createDiContainer({

@@ -24,6 +24,14 @@ runApp<FromSchema<typeof configSchema>>({
             name: 'called_interval'
         })
 
+        metrics.createGauge({
+            help: 'Random value',
+            name: 'random',
+            collect() {
+                this.set(Math.round(Math.random() * 10000))
+            }
+        })
+
         for await (const _ of setInterval(1000, undefined, { signal: abortSignal})) {
             tickCounter.inc()
         }
