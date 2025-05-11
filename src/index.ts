@@ -344,6 +344,19 @@ class App<Config extends BaseConfig> {
             formatter: new MetricsFormatter,
             registry: metricsRegistry
         })
+        const metricsLogger = fwkLogger.child('metrics')
+
+        metricsServer.on('request', (request) => {
+            metricsLogger.debug('Request')
+        })
+
+        metricsServer.on('response', (request, response) => {
+
+        })
+
+        metricsServer.on('error', (request, response) => {
+
+        })
 
         this.services = createDiContainer({
             config: this.config,

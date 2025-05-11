@@ -32,8 +32,17 @@ runApp<FromSchema<typeof configSchema>>({
             }
         })
 
+        const httpInputHistogram = metrics.createHistogram({
+            help: 'Input Http Requests',
+            name: 'input_http',
+            buckets: [40, 100, 500]
+        })
+
         for await (const _ of setInterval(1000, undefined, { signal: abortSignal})) {
+            const elapsedTime = Math.round(Math.random() * 750)
             tickCounter.inc()
+            httpInputHistogram.observe(elapsedTime)
+            //remoteEE.emit('tick', { elapsedTime })
         }
     }
 })
