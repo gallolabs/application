@@ -68,6 +68,10 @@ export type RunHandler<Config extends BaseConfig> = (services: Services<Config>)
 export interface AppDefinition<Config extends BaseConfig> {
     name: string
     version: string
+    infos?: {
+        logo?: string | Buffer
+        icon?: string | Buffer
+    }
     consoleUse?: 'accepted' | 'to-log' | 'block&warn' | 'block'
     config?: Omit<ConfigOpts<Config>, 'logger' | 'watchChanges'> & { watchChanges?: boolean }
     logger?: Omit<LoggerOpts, 'handlers' | 'errorHandler' | 'id'>
